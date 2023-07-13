@@ -65,6 +65,7 @@ jobs:
         run: rustup target add ${{ matrix.target.rustTarget }}
 
       - name: Update Sources
+        if: ${{ contains(matrix.target.rustTarget, 'linux') }}
         run: sudo apt update
 
       - name: Add Windows Build Dependencies
