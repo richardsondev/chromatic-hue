@@ -1,52 +1,70 @@
-# Rust Application Template
+# Chromatic Hue
 
-This is a template project to build a Rust application using GitHub Actions and automatically publish release artifacts for Windows, Linux, and macOS.
+Chromatic Hue is a Rust application that smoothly transitions the color of Philips Hue lights through a color spectrum. It supports configuring multiple lights to sync at the same time and communicates with the Hue bridge on the local network. This utilizes the [hueclient](https://lib.rs/crates/hueclient) library for the communication with the Philips Hue bridge behind the scenes.
 
-## How to Use
+## Getting Started
 
-1. **Create a new repository from this template.**
-    
-    On GitHub, click the "Use this template" button to create a new repository based on this template.
+To use Chromatic Hue, you have three options:
 
-2. **Clone your new repository.**
-    
-    Clone your newly created repository to your local machine and navigate to the root directory of the project.
+### 1. Using the Prebuilt Docker Image
 
-3. **Run the project locally.**
+You can use the prebuilt Docker image available on Docker Hub to quickly deploy Chromatic Hue without building from source.
 
-    You can run the project locally by using the following command in your terminal:
-    
-    ```bash
-    cargo run
-    ```
+```bash
+$ docker run -d \
+    -e HUE_BRIDGE_IP=<bridge_ip> \
+    -e HUE_BRIDGE_USERNAME=<bridge_username> \
+    -e HUE_LIGHT_IDS=<light_ids> \
+    richardsondev/chromatic-hue
+```
 
-    This command will compile your code and run the resulting executable.
+Replace `<bridge_ip>`, `<bridge_username>`, and `<light_ids>` with your own values.
 
-4. **Commit and push changes.**
-    
-    After making changes, commit and push to your repository. GitHub Actions will automatically start the build process.
+### 2. Downloading the Prebuilt Release Binaries
 
-## GitHub Actions
+You can also download prebuilt release binaries from the Chromatic Hue GitHub repository. Visit the [Releases](https://github.com/richardsondev/chromatic-hue/releases) page and download the appropriate binary for your operating system and architecture. Then, set the required environment variables mentioned in the previous section and run the downloaded binary.
 
-This project uses GitHub Actions for continuous integration. Upon each push to your repository or release creation, the workflow will:
+### 3. Compiling from Source
 
-- Check out the latest code.
-- Set up the necessary Rust environment.
-- Build and test the project.
-- Create release artifacts for Windows, Linux, and macOS. (Only on release creation events)
+To compile and run Chromatic Hue from source, follow these steps:
 
-The artifacts will then be available for download from the "Actions" tab on your repository and also from the "Releases" tab for release events.
+1. Install Rust and Cargo by following the instructions at [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install).
 
-## Docker image
+2. Clone the Chromatic Hue repository:
 
-This project also contains `buildpush.sh` which will build a distroless Docker image with the application as the entry point. By default, the 
-script will push the built multi-arch images to DockerHub. [Here](https://hub.docker.com/r/richardsondev/hello_world/tags) is an example of 
-what it would look like.
+```bash
+$ git clone https://github.com/richardsondev/chromatic-hue.git
+```
 
-## Contributing
+3. Navigate to the project directory:
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+```bash
+$ cd chromatic-hue
+```
+
+4. Set the required environment variables:
+
+- `HUE_BRIDGE_IP`: The IP address of your Hue bridge.
+- `HUE_BRIDGE_USERNAME`: The username for accessing the Hue bridge API. Follow the Philips Hue documentation to create a new username.
+- `HUE_LIGHT_IDS`: Comma-separated IDs of the lights you want to control.
+
+5. Build and run the application:
+
+```bash
+$ cargo run
+```
+
+The application will start changing the color of the specified lights smoothly through a color spectrum. It will continue running indefinitely, periodically syncing with the current time.
+
+## Configuration
+
+The behavior of Chromatic Hue can be customized using the following environment variables:
+
+- `HUE_BRIDGE_IP` (required): The IP address of the Hue bridge.
+- `HUE_BRIDGE_USERNAME` (required): The username for accessing the Hue bridge API.
+- `HUE_LIGHT_IDS` (required): Comma-separated IDs of the lights to control. Limit to a maximum of 100 light IDs.
+- `FRAME_LIMIT` (optional): The maximum number of frames to run the animation (only for testing purposes).
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

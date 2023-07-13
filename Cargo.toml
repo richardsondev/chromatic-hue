@@ -1,7 +1,12 @@
 [package]
-name = "hello_world"
+name = "chromatic-hue"
 version = "0.1.0"
-authors = ["Your Name <your.email@example.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
+hueclient = "0.4.3"
+tokio = { version = "1.9.0", features = ["full"] }
+structopt = "0.3"
+
+[dev-dependencies]
+async-trait = "0.1.59"
