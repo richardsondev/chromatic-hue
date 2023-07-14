@@ -115,7 +115,7 @@ async fn run_spectrum_pattern(frame_limit: Option<usize>, light_ids: Vec<usize>,
         let scaled_value: u64 = (elapsed.as_secs() * max_value) / seconds_in_day;
         let hue: u16 = scaled_value as u16;
 
-        let cmd: hueclient::CommandLight = hueclient::CommandLight::default().with_hue(hue);
+        let cmd: hueclient::CommandLight = hueclient::CommandLight::default().with_sat(200).with_hue(hue);
 
         let should_emit_message: bool = last_message < elapsed.as_secs() && elapsed.as_secs() % 30 == 0;
         if should_emit_message {
