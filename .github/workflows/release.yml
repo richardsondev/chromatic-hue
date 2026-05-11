@@ -114,20 +114,20 @@ jobs:
       - name: Build .deb package
         if: ${{ github.event_name == 'release' && matrix.target.debArch != '' }}
         run: |
-          mkdir -p dpkg/DEBIAN dpkg/usr/local/bin
-          cp ./target/${{ matrix.target.rustTarget }}/release/chromatic-hue dpkg/usr/local/bin/
-          chmod 755 dpkg/usr/local/bin/chromatic-hue
+          mkdir -p dpkg/DEBIAN dpkg/usr/bin
+          cp ./target/${{ matrix.target.rustTarget }}/release/${{ env.APP_NAME }} dpkg/usr/bin/
+          chmod 755 dpkg/usr/bin/${{ env.APP_NAME }}
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
           cat > dpkg/DEBIAN/control << EOF
-          Package: chromatic-hue
+          Package: ${{ env.APP_NAME }}
           Version: $VERSION
           Architecture: ${{ matrix.target.debArch }}
           Maintainer: richardsondev
           Description: Philips Hue color utility
           EOF
           sed -i 's/^          //' dpkg/DEBIAN/control
-          dpkg-deb --build dpkg chromatic-hue_${VERSION}_${{ matrix.target.debArch }}.deb
+          dpkg-deb --build dpkg ${{ env.APP_NAME }}_${VERSION}_${{ matrix.target.debArch }}.deb
 
       - name: Upload .deb Release Asset
         if: ${{ github.event_name == 'release' && matrix.target.debArch != '' }}
@@ -136,4 +136,4 @@ jobs:
         run: |
           VERSION="${{ github.ref_name }}"
           VERSION="${VERSION#v}"
-          gh release upload ${{ github.event.release.tag_name }} ./chromatic-hue_${VERSION}_${{ matrix.target.debArch }}.deb
+          gh release upload ${{ github.event.release.tag_name }} --clobber ./${{ env.APP_NAME }}_${VERSION}_${{ matrix.target.debArch }}.deb
