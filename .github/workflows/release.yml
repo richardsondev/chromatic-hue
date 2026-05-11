@@ -3,12 +3,12 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
   release:
     types: [released]
   pull_request:
     branches:
-      - main
+      - master
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
