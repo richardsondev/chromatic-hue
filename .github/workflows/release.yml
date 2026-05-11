@@ -3,12 +3,12 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
   release:
     types: [released]
   pull_request:
     branches:
-      - main
+      - master
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -35,22 +35,27 @@ jobs:
           # Linux
           - { displayName: 32-bit Linux,
               rustTarget: i686-unknown-linux-gnu,
+              debArch: i386,
               runner: 'ubuntu-latest' }
 
           - { displayName: 64-bit Linux,
               rustTarget: x86_64-unknown-linux-gnu,
+              debArch: amd64,
               runner: 'ubuntu-latest' }
 
           - { displayName: ARM32 ARMv6 Linux,
               rustTarget: arm-unknown-linux-gnueabi,
+              debArch: armel,
               runner: 'ubuntu-latest' }
 
           - { displayName: ARM32 ARMv7 Linux,
               rustTarget: armv7-unknown-linux-gnueabihf,
+              debArch: armhf,
               runner: 'ubuntu-latest' }
 
           - { displayName: ARM64 Linux,
               rustTarget: aarch64-unknown-linux-gnu,
+              debArch: arm64,
               runner: 'ubuntu-latest' }
 
           # macOS
@@ -105,3 +110,30 @@ jobs:
         run: |
           cp ./target/${{ matrix.target.rustTarget }}/release/${{ env.APP_NAME }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }} ./${{ env.APP_NAME }}-${{ github.ref_name }}-${{ matrix.target.rustTarget }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }} &&
           gh release upload ${{ github.event.release.tag_name }} ./${{ env.APP_NAME }}-${{ github.ref_name }}-${{ matrix.target.rustTarget }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }}#"${{ env.APP_NAME }}-${{ github.ref_name }}-${{ matrix.target.rustTarget }}${{ endsWith(matrix.target.rustTarget, '-windows-gnu') && '.exe' || '' }} (${{ matrix.target.displayName }})"
+
+      - name: Build .deb package
+        if: ${{ github.event_name == 'release' && matrix.target.debArch != '' }}
+        run: |
+          mkdir -p dpkg/DEBIAN dpkg/usr/bin
+          cp ./target/${{ matrix.target.rustTarget }}/release/${{ env.APP_NAME }} dpkg/usr/bin/
+          chmod 755 dpkg/usr/bin/${{ env.APP_NAME }}
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          cat > dpkg/DEBIAN/control << EOF
+          Package: ${{ env.APP_NAME }}
+          Version: $VERSION
+          Architecture: ${{ matrix.target.debArch }}
+          Maintainer: richardsondev
+          Description: Philips Hue color utility
+          EOF
+          sed -i 's/^          //' dpkg/DEBIAN/control
+          dpkg-deb --build dpkg ${{ env.APP_NAME }}_${VERSION}_${{ matrix.target.debArch }}.deb
+
+      - name: Upload .deb Release Asset
+        if: ${{ github.event_name == 'release' && matrix.target.debArch != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          gh release upload ${{ github.event.release.tag_name }} --clobber ./${{ env.APP_NAME }}_${VERSION}_${{ matrix.target.debArch }}.deb
