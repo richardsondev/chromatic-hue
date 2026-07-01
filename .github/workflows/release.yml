@@ -67,7 +67,7 @@ jobs:
     steps:
       # Get the machine ready to build
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Add Rust Target
         run: rustup target add ${{ matrix.target.rustTarget }}
